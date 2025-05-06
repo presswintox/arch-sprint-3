@@ -14,10 +14,10 @@ System_Boundary(c1, "'Warmhouse'") {
     Container(admin_panel, "Админка", "JS")
     Container(GatewayService, "APIGateway", "Kong")    
 
-    System_Boundary(PaymentSystem, "'Микросервис платежей'") {
-        Container(PaymentService, "PaymentService", "Java")
-        ContainerDb(PaymentDb, "PaymentDb", "PostgreSQL")
-        Rel(PaymentService, PaymentDb, "")
+    System_Boundary(SubscriptionSystem, "'Микросервис подписок на сервис'") {
+        Container(SubscriptionService, "SubscriptionService", "Java")
+        ContainerDb(SubscriptionDb, "PaymentDb", "PostgreSQL")
+        Rel(SubscriptionService, SubscriptionDb, "")
     }
 
     System_Boundary(DeviceSystem, "'Микросервис 'умных' устройств") {
@@ -46,7 +46,7 @@ System_Boundary(c1, "'Warmhouse'") {
     Rel_D(web, GatewayService, "")
     
     Rel_D(GatewayService, DeviceService, "")
-    Rel_D(GatewayService, PaymentService, "")
+    Rel_D(GatewayService, SubscriptionService, "")
     Rel_D(GatewayService, TechPodService, "")
     Rel_D(GatewayService, TelemetryService, "")
 
@@ -63,7 +63,7 @@ Rel(admin, admin_panel, "")
 Rel(tech_pod, admin_panel, "")
 
 
-Rel_L(PaymentService, payment_sys, "")
+Rel_L(SubscriptionService, payment_sys, "")
 Rel(DeviceService, warm_system, "")
 Rel(DeviceService, temp_sensor, "")
 Rel(temp_sensor, Kafka,  "")

@@ -1,4 +1,30 @@
 @startuml
-abstract class AbstractDevice
-class DeviceRepository
+
+abstract class AbstractDeviceManager {
+    +void getDevice()
+}
+DbRepository -down-> Db: SQL
+
+abstract class AbsDeviceService {
+    +void turntOn()
+    +void turntOff()
+}
+class WarmDeviceServiceImpl {
+    +void setTargetTemperature()
+}
+class TemperatureSensorDeviceServiceImpl {
+    +void getCurrentTemperature()
+} 
+
+getCurrentTemperature -> DbRepository
+setTargetTemperature -left-> DbRepository
+TemperatureSensorDeviceManagerImpl -right-> getDevice:  Получить девайс
+getDevice -> DbRepository
+AbstractDeviceManager -- TemperatureSensorDeviceManagerImpl
+TemperatureSensorDeviceServiceImpl -down-> TemperatureSensorDeviceManagerImpl: Получить девайс
+TemperatureSensorDeviceServiceImpl -> getCurrentTemperature
+
+AbsDeviceService -- WarmDeviceServiceImpl
+AbsDeviceService -- TemperatureSensorDeviceServiceImpl
+WarmDeviceServiceImpl -down- setTargetTemperature
 @enduml

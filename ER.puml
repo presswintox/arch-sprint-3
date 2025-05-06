@@ -1,0 +1,98 @@
+@startuml
+class User {
+  +UUID id
+  +String firstName
+  +String lastName
+  +String email
+  +String password
+  +String role
+  +List<House> houses
+  +void register()
+  +void login()
+  +void editProfile()
+}
+
+class House {
+  +String address
+  +FK user_id
+  +List<Device> devices
+  +void add()
+  +void edit()
+}
+
+class DeviceType {
+  +string name
+  +void add()
+}
+
+class Device {
+  +UUID id
+  +FK type_id
+  +FK house_id
+  +List<Telemetry> telemetries
+  +String serial_number
+  +Bool is_active
+
+  +void add()
+  +void edit()
+  +void delete()
+  +void turnOn()
+  +void turnOff()
+  +void setTargetTemperature()
+}
+
+class Telemetry {
+  +UUID id
+  +FK device_id
+  +dict data  
+
+  +void parseData()
+  +void getCurrentTemperature()
+}
+
+class TechPodTicket {
+  +UUID id
+  +FK user_id
+  +String name
+  +String description
+  +String status
+
+  +void changeStatus()
+}
+
+class Subscription {
+  +UUID id
+  +FK user_id
+  +String type
+  +Date startDate
+  +Date endDate
+  +void activate()
+  +void cancel()
+}
+
+class SubscriptionPayment {
+  +UUID id
+  +FK subscription_id
+  +Float total
+  +FK transaction_id
+  
+  +void initPayment()
+}
+
+class Transaction {
+  +UUID id
+  +String status
+  +void getStatus()
+}
+
+
+User "1" -- "0..*" House : has
+House "1" -- "0..*" Device : has
+DeviceType "1" -- "0..*" Device : has
+Device "1" -- "0..*" Telemetry : has
+User "1" -- "0..*" TechPodTicket : has
+
+User "1" -- "1" Subscription : one
+Subscription  "1" -- "0.." SubscriptionPayment  : has
+SubscriptionPayment  "1" -- "1" Transaction  : one
+@enduml

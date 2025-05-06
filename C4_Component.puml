@@ -7,7 +7,7 @@ System_Ext(payment_sys, "Платежная система")
 Container(GatewayService, "APIGateway", "Kong")   
 ContainerDb(DeviceDb, "DeviceDb", "PostgreSQL")
 ContainerDb(TelemetryDb, "TelemetryDb", "MongoDB")
-ContainerDb(PaymentDb, "PaymentDb", "PostgreSQL")
+ContainerDb(SubscriptionDb, "SubscriptionDb", "PostgreSQL")
 ContainerDb(TechPodDb, "TechPodDb", "PostgreSQL")
 Container_Boundary(MessageBroker, "'Message Broker'") {
         Component(KafkaAPI, "Kafka", )
@@ -36,19 +36,22 @@ Container_Boundary(c2, "'Микросервис телеметрии'") {
     Rel_D(TelemetryRepository, TelemetryDb, "Read and write SQL/ORM")
     Rel(TelemetryKafkaService, KafkaAPI, "Read events")
 }
-Container_Boundary(c3, "'Микросервис платежей'") {
+Container_Boundary(c3, "'Микросервис подписки на сервис'") {
     Component(PaymentController, "Controller", "Контроллер API")
+    Component(SubscriptionService, "SubscriptionService", "Работа с подписками") 
     Component(PaymentTrunsactionManager, "PaymentTrunsactionManager", "Состояние транзакции")
     Component(PaymentService, "PaymentService", "Работа с платежами") 
     Component(PaymentExtService, "PaymentExtService", "Работа с API платежной системы") 
-    Component(PaymentRepository, "PaymentRepository", "Выполнение действии с бд") 
+    Component(DbRepository, "DbRepository", "Выполнение действии с бд") 
 
-    Rel(PaymentController, PaymentService, "uses")
-    Rel(PaymentService, PaymentRepository, "uses")
+    Rel(SubscriptionService, PaymentService, "uses")
+    Rel(PaymentController, SubscriptionService, "uses")
+    Rel(PaymentService, DbRepository, "uses")
     Rel(PaymentService, PaymentExtService, "uses")
-    Rel(PaymentTrunsactionManager, PaymentRepository, "uses")
+    Rel(PaymentTrunsactionManager, DbRepository, "uses")
+    Rel(SubscriptionService, DbRepository, "uses")
     Rel(PaymentTrunsactionManager, PaymentExtService, "uses")
-    Rel_D(PaymentRepository, PaymentDb, "Read and write SQL/ORM")
+    Rel_D(DbRepository, SubscriptionDb, "Read and write SQL/ORM")
     Rel(PaymentExtService, payment_sys, "Проведение оплаты")
 }
 Container_Boundary(c4, "'Микросервис тех. поддержки'") {

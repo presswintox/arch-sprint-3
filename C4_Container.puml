@@ -1,0 +1,70 @@
+@startuml
+!include ./C4_templates/C4_Context.puml
+!include ./C4_templates/C4_Container.puml
+!include ./C4_templates/C4_Component.puml
+
+Person(admin, "Администратор")
+Person(tech_pod, "Тех. поддержка")
+Person(сlient, "Клиент")
+Person(worker, "Тех. специалист (deprecated)")
+
+System_Boundary(c1, "'Warmhouse'") {
+
+    Container(web, "Web-Клиент", "JS")
+    Container(admin_panel, "Админка", "JS")
+    Container(GatewayService, "APIGateway", "Kong")    
+
+    System_Boundary(PaymentSystem, "'Микросервис платежей'") {
+        Container(PaymentService, "PaymentService", "Java")
+        ContainerDb(PaymentDb, "PaymentDb", "PostgreSQL")
+        Rel(PaymentService, PaymentDb, "")
+    }
+
+    System_Boundary(DeviceSystem, "'Микросервис 'умных' устройств") {
+        Container(DeviceService, "DeviceService", "Java")
+        ContainerDb(DeviceDb, "DeviceDb", "PostgreSQL")
+        Rel_L(DeviceService, DeviceDb, "")
+    }
+
+    System_Boundary(TechPodSystem, "'Микросервис тех. поддержки'") {
+        Container(TechPodService, "TechPodService", "Java")
+        ContainerDb(TechPodDb, "TechPodDb", "PostgreSQL")
+        Rel(TechPodService, TechPodDb, "")
+    }
+    
+    System_Boundary(TelemetrySystem, "'Микросервис телеметрии'") {
+        Container(TelemetryService, "TelemetryService", "Java")
+        ContainerDb(TelemetryDb, "TelemetryDb", "MongoDB")
+        Rel(TelemetryService, TelemetryDb, "")
+    }
+
+    System_Boundary(MessageBroker, "'Message Broker'") {
+        Container(Kafka, "Kafka", )
+    }
+
+    Rel_D(admin_panel, GatewayService, "")
+    Rel_D(web, GatewayService, "")
+    
+    Rel_D(GatewayService, DeviceService, "")
+    Rel_D(GatewayService, PaymentService, "")
+    Rel_D(GatewayService, TechPodService, "")
+    Rel_D(GatewayService, TelemetryService, "")
+
+    Rel(Kafka, TelemetryService,  "")
+}
+
+Container(warm_system, "Система отопления", $sprite="robot")
+Container(temp_sensor, "Датчик температуры", $sprite="robot")
+
+System_Ext(payment_sys, "Платежная система")
+
+Rel(сlient, web, "")
+Rel(admin, admin_panel, "")
+Rel(tech_pod, admin_panel, "")
+
+
+Rel_L(PaymentService, payment_sys, "")
+Rel(DeviceService, warm_system, "")
+Rel(DeviceService, temp_sensor, "")
+Rel(temp_sensor, Kafka,  "")
+@enduml 

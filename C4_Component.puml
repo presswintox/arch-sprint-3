@@ -1,0 +1,75 @@
+@startuml
+!include ./C4_templates/C4_Context.puml
+!include ./C4_templates/C4_Container.puml
+!include ./C4_templates/C4_Component.puml
+
+System_Ext(payment_sys, "Платежная система")
+Container(GatewayService, "APIGateway", "Kong")   
+ContainerDb(DeviceDb, "DeviceDb", "PostgreSQL")
+ContainerDb(TelemetryDb, "TelemetryDb", "MongoDB")
+ContainerDb(PaymentDb, "PaymentDb", "PostgreSQL")
+ContainerDb(TechPodDb, "TechPodDb", "PostgreSQL")
+Container_Boundary(MessageBroker, "'Message Broker'") {
+        Component(KafkaAPI, "Kafka", )
+    }
+
+Container_Boundary(c1, "'Микросервис 'умных' устройств'") {
+    Component(DeviceController, "Controller", "Контроллер API")
+    Component(DeviceManager, "DeviceManager", "Состояние устройства")
+    Component(DeviceService, "DeviceService", "Выполнение действии с устройством") 
+    Component(DeviceRepository, "DeviceRepository", "Выполнение действии с бд") 
+
+    Rel(DeviceController, DeviceService, "uses")
+    Rel(DeviceService, DeviceRepository, "uses")
+    Rel(DeviceManager, DeviceRepository, "uses")
+    Rel_D(DeviceRepository, DeviceDb, "Read and write SQL/ORM")
+}
+Container_Boundary(c2, "'Микросервис телеметрии'") {
+    Component(TelemetryController, "Controller", "Контроллер API")
+    Component(TelemetryService, "TelemetryService", "Выполнение действии с телеметрией") 
+    Component(TelemetryRepository, "TelemetryRepository", "Выполнение действии с бд") 
+    Component(TelemetryKafkaService, "TelemetryKafkaService", "Получение данных из Kafka") 
+
+    Rel(TelemetryController, TelemetryService, "uses")
+    Rel(TelemetryService, TelemetryRepository, "uses")
+    Rel(TelemetryKafkaService, TelemetryRepository, "uses")
+    Rel_D(TelemetryRepository, TelemetryDb, "Read and write SQL/ORM")
+    Rel(TelemetryKafkaService, KafkaAPI, "Read events")
+}
+Container_Boundary(c3, "'Микросервис платежей'") {
+    Component(PaymentController, "Controller", "Контроллер API")
+    Component(PaymentTrunsactionManager, "PaymentTrunsactionManager", "Состояние транзакции")
+    Component(PaymentService, "PaymentService", "Работа с платежами") 
+    Component(PaymentExtService, "PaymentExtService", "Работа с API платежной системы") 
+    Component(PaymentRepository, "PaymentRepository", "Выполнение действии с бд") 
+
+    Rel(PaymentController, PaymentService, "uses")
+    Rel(PaymentService, PaymentRepository, "uses")
+    Rel(PaymentService, PaymentExtService, "uses")
+    Rel(PaymentTrunsactionManager, PaymentRepository, "uses")
+    Rel(PaymentTrunsactionManager, PaymentExtService, "uses")
+    Rel_D(PaymentRepository, PaymentDb, "Read and write SQL/ORM")
+    Rel(PaymentExtService, payment_sys, "Проведение оплаты")
+}
+Container_Boundary(c4, "'Микросервис тех. поддержки'") {
+    Component(TechPodController, "Controller", "Контроллер API")
+    Component(TechPodService, "TechPodService", "Выполнение действии с заявками") 
+    Component(TechPodRepository, "TechPodRepository", "Выполнение действии с бд") 
+    
+    Rel(TechPodController, TechPodService, "uses")
+    Rel(TechPodService, TechPodRepository, "uses")
+    Rel_D(TechPodRepository, TechPodDb, "Read and write SQL/ORM")
+    
+}
+
+Container(warm_system, "Система отопления", $sprite="robot")
+Container(temp_sensor, "Датчик температуры", $sprite="robot")
+
+Rel_D(GatewayService, TelemetryController, "REST API")
+Rel_D(GatewayService, DeviceController, "REST API")
+Rel_D(GatewayService, PaymentController, "REST API")
+Rel_D(GatewayService, TechPodController, "REST API")
+Rel(DeviceManager, warm_system, "Device Protocol")
+Rel(DeviceManager, temp_sensor, "Device Protocol")
+Rel_U(temp_sensor, KafkaAPI, "Events")
+@enduml 

@@ -1,0 +1,25 @@
+@startuml
+!include ./C4_templates/C4_Context.puml
+!include ./C4_templates/C4_Container.puml
+!include ./C4_templates/C4_Component.puml
+
+Person(admin, "Администратор")
+Person(tech_pod, "Тех. поддержка")
+Person(сlient, "Клиент")
+Person(worker, "Тех. специалист")
+
+Container(warm_system, "Система отопления", $sprite="robot")
+Container(temp_sensor, "Датчик температуры", $sprite="robot")
+
+System(app, "Warmhouse", "Управление отоплением дома")
+System_Ext(payment_sys, "Платежная система")
+
+Rel(сlient, app, "Управление отоплением. Мониторинг температуры. Оплата услуг.")
+Rel(admin, app, "Управление заявками на подключение.")
+Rel(tech_pod, app, "Техническая поддержка")
+Rel(worker, app, "Подключение системы отопления в доме")
+
+Rel(app, warm_system, "Включение/выключение отопления")
+Rel(app, temp_sensor, "Информация о температуре")
+Rel(app, payment_sys, "Проведение платежей")
+@enduml 
